@@ -9,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/akadotsh/image-app/backend/config"
 	"github.com/akadotsh/image-app/backend/graph"
+	customMiddleware "github.com/akadotsh/image-app/backend/middleware"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -42,6 +43,7 @@ func main() {
 		Debug:            true,
 	}).Handler)
    router.Use(middleware.Logger)
+   router.Use(customMiddleware.AuthMiddleware(db))
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 

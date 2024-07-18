@@ -11,6 +11,7 @@ import (
 
 	"github.com/akadotsh/image-app/backend/config"
 	"github.com/akadotsh/image-app/backend/graph/model"
+	"github.com/akadotsh/image-app/backend/middleware"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -124,7 +125,25 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	database, ok := config.FromContext(ctx)
+
+	user, err := middleware.GetCurrentUserFromCTX(ctx)
+
+	if err != nil {
+		return nil, ErrNotAuthorized
+	}
+
+	if !ok {
+		panic("db not found")
+	}
+	var dbuser model.User
+
+	database.Collection("users").FindOne(ctx, bson.M{"_id": user.ID}).Decode(&dbuser)
+
+	fmt.Println("fetched user", user)
+
+	return &dbuser, nil
+
 }
 
 // Mutation returns MutationResolver implementation.
