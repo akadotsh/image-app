@@ -6,19 +6,125 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	model1 "github.com/akadotsh/image-app/backend/graph/model"
+	"github.com/akadotsh/image-app/backend/config"
+	"github.com/akadotsh/image-app/backend/graph/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model1.NewTodo) (*model1.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+var (
+	ErrBadCredential = errors.New("invalid email or password")
+	ErrNotAuthorized = errors.New("authorization required, please log in again")
+	ErrMissingLoginFields = errors.New("email and password are required")
+)
+
+
+// CreateAccount is the resolver for the createAccount field.
+func (r *mutationResolver) CreateAccount(ctx context.Context, username string, email string, password string) (*model.AuthPayload, error) {
+	database, ok := config.FromContext(ctx)
+
+	if !ok {
+		return nil, fmt.Errorf("database connection error")
+	}
+
+	collection := database.Collection("users")
+
+	var existingUser model.User
+
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&existingUser)
+
+	if err == nil {
+		return nil, errors.New("user with this email already exists")
+	} else if err != mongo.ErrNoDocuments {
+		return nil, err
+	}
+
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return nil, err
+	}
+
+	newUser := &model.User{
+		ID:       primitive.NewObjectID().Hex(),
+		Email:    email,
+		Name:     username,
+		Password: string(hashPassword),
+	}
+
+	fmt.Println("new user", newUser)
+
+	_, err = collection.InsertOne(ctx, newUser)
+
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := config.GenerateToken(newUser.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.AuthPayload{
+		Token: token,
+		User:  newUser,
+	}, nil
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model1.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// Login is the resolver for the login field.
+func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.AuthPayload, error) {
+	
+	if email == "" || password == "" {
+		return nil, ErrMissingLoginFields
+	}
+	
+	database, ok := config.FromContext(ctx)
+
+	if !ok {
+		return nil, fmt.Errorf("database connection error")
+	}
+	collection := database.Collection("users")
+	
+	var user model.User
+
+
+	err:= collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+
+	if err != nil {
+        if err == mongo.ErrNoDocuments {
+            // Use a generic error message to avoid revealing user existence
+            return nil, ErrBadCredential
+        }
+        return nil, fmt.Errorf("database query error: %w", err)
+    }
+
+	fmt.Println("login: user", user)
+
+	if !config.VerifyPassword(user.Password, password) {
+		return nil, ErrBadCredential
+	}
+
+	token, err := config.GenerateToken(user.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("token generation error: %w", err)
+	}
+
+	return &model.AuthPayload{
+		Token: token,
+		User:  &user,
+	}, nil
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
 }
 
 // Mutation returns MutationResolver implementation.

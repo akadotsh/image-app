@@ -2,6 +2,31 @@
 #
 # https://gqlgen.com/getting-started/
 
+# type Todo {
+#   id: ID!
+#   text: String!
+#   done: Boolean!
+#   user: User!
+# }
+
+# type User {
+#   id: ID!
+#   name: String!
+# }
+
+# type Query {
+#   todos: [Todo!]!
+# }
+
+# input NewTodo {
+#   text: String!
+#   userId: String!
+# }
+
+# type Mutation {
+#   createTodo(input: NewTodo!): Todo!
+# }
+
 type Todo {
   id: ID!
   text: String!
@@ -11,18 +36,41 @@ type Todo {
 
 type User {
   id: ID!
+  email: String!
   name: String!
+  password: String!
 }
+
+# url: String!
+# uploadedBy: User!
+# type Image {
+#   id: ID!
+#   url: String!
+#   filename: String!
+#   uploadedBy: User!
+# }
 
 type Query {
-  todos: [Todo!]!
+  user: User
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
+scalar Upload
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createAccount(
+    username: String!
+    email: String!
+    password: String!
+  ): AuthPayload
+  login(email: String!, password: String!): AuthPayload!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type DeletePictureResponse {
+  success: Boolean!
+  message: String!
 }

@@ -2,12 +2,17 @@
 
 package model
 
-type Mutation struct {
+type AuthPayload struct {
+	Token string `json:"token"`
+	User  *User  `json:"user"`
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type DeletePictureResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+type Mutation struct {
 }
 
 type Query struct {
@@ -21,6 +26,8 @@ type Todo struct {
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+    ID       string `json:"id" bson:"_id,omitempty"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
