@@ -7,16 +7,17 @@ package graph
 import (
 	"context"
 	"fmt"
-	"image-app-backend/graph/model"
+
+	model1 "github.com/akadotsh/image-app/backend/graph/model"
 )
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateTodo(ctx context.Context, input model1.NewTodo) (*model1.Todo, error) {
 	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
 }
 
 // Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *queryResolver) Todos(ctx context.Context) ([]*model1.Todo, error) {
 	panic(fmt.Errorf("not implemented: Todos - todos"))
 }
 
