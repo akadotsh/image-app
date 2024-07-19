@@ -32,26 +32,34 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+
+
 	db:= config.ConnectDB(db_password)
     
 
 	router:= chi.NewRouter();
 
-	router.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		Debug:            true,
+	// middlewares
+    router.Use(cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},  // Your React app's address
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"*"},
 	}).Handler)
    router.Use(middleware.Logger)
    router.Use(customMiddleware.AuthMiddleware(db))
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
+	fileServer := http.FileServer(http.Dir("./public"))
+
+	// Route Handlers
+    router.Handle("/documentation/*", http.StripPrefix("/documentation", fileServer))
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", dbMiddleware(db,srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Printf("Documentation available at http://localhost:%s/documentation/", port)
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 }
 
 

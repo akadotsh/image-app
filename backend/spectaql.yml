@@ -1,0 +1,14 @@
+spectaql:
+  targetDir: ./public
+
+introspection:
+  schemaFile: ./graph/schema.graphqls
+
+servers:
+  - url: http://localhost:8080/query
+    description: Local Development Server
+
+
+info:
+  title: Image Upload API
+  description: Image Upload Graphql Documentation
