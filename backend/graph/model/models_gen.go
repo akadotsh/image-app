@@ -12,17 +12,17 @@ type DeletePictureResponse struct {
 	Message string `json:"message"`
 }
 
+type Image struct {
+    ID       string `json:"id" bson:"_id,omitempty"`
+	URL      string `json:"url"`
+	Filename string `json:"filename"`
+	UserID   string `json:"userId"`
+}
+
 type Mutation struct {
 }
 
 type Query struct {
-}
-
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
 }
 
 type User struct {

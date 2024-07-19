@@ -8,22 +8,25 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/akadotsh/image-app/backend/config"
 	"github.com/akadotsh/image-app/backend/graph/model"
 	"github.com/akadotsh/image-app/backend/middleware"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var (
-	ErrBadCredential = errors.New("invalid email or password")
-	ErrNotAuthorized = errors.New("authorization required, please log in again")
-	ErrMissingLoginFields = errors.New("email and password are required")
-)
-
 
 // CreateAccount is the resolver for the createAccount field.
 func (r *mutationResolver) CreateAccount(ctx context.Context, username string, email string, password string) (*model.AuthPayload, error) {
@@ -80,30 +83,28 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, username string, e
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, email string, password string) (*model.AuthPayload, error) {
-	
 	if email == "" || password == "" {
 		return nil, ErrMissingLoginFields
 	}
-	
+
 	database, ok := config.FromContext(ctx)
 
 	if !ok {
 		return nil, fmt.Errorf("database connection error")
 	}
 	collection := database.Collection("users")
-	
+
 	var user model.User
 
-
-	err:= collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 
 	if err != nil {
-        if err == mongo.ErrNoDocuments {
-            // Use a generic error message to avoid revealing user existence
-            return nil, ErrBadCredential
-        }
-        return nil, fmt.Errorf("database query error: %w", err)
-    }
+		if err == mongo.ErrNoDocuments {
+			// Use a generic error message to avoid revealing user existence
+			return nil, ErrBadCredential
+		}
+		return nil, fmt.Errorf("database query error: %w", err)
+	}
 
 	fmt.Println("login: user", user)
 
@@ -123,6 +124,115 @@ func (r *mutationResolver) Login(ctx context.Context, email string, password str
 	}, nil
 }
 
+// UploadPicture is the resolver for the uploadPicture field.
+func (r *mutationResolver) UploadPicture(ctx context.Context, file *graphql.Upload) (*model.Image, error) {
+	
+	user, err := middleware.GetCurrentUserFromCTX(ctx)
+	
+	if err != nil {
+		return nil, ErrNotAuthorized
+	}
+	
+	database, ok := config.FromContext(ctx)
+	
+	if !ok {
+		return nil, fmt.Errorf("database connection error")
+	}
+	err = godotenv.Load()
+	
+	collection := database.Collection("images")
+
+	if err != nil {
+		log.Println("Error loading env file")
+	}
+
+	// AWS credentials
+	region := os.Getenv("AWS_REGION")
+	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+	// load aws sdk config
+	cfg, err := awsConfig.LoadDefaultConfig(context.TODO(), awsConfig.WithRegion(region), awsConfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")))
+
+	if err != nil {
+		return nil, fmt.Errorf("unable to load aws sdk")
+	}
+
+	s3Client := s3.NewFromConfig(cfg)
+
+	// creating unique filenanme
+	filename := uuid.New().String() + filepath.Ext(file.Filename)
+	bucket := "assignment-image-app"
+	s3Key := "images/" + filename
+
+	fmt.Println("UploadPicture",user.ID)
+
+	// upload picture to s3
+	resp, err := s3Client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(bucket),
+		Key:         aws.String(s3Key),
+		Body:        file.File,
+		ContentType: aws.String(file.ContentType),
+	})
+
+	fmt.Println("resp", resp)
+
+	if err != nil {
+		return nil, fmt.Errorf("Failed to upload file", err)
+	}
+
+	url := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucket, region, s3Key)
+	fmt.Println("URL", url)
+
+	// creating Image document with metadata
+	image := &model.Image{
+		ID:       primitive.NewObjectID().Hex(),
+		URL:      url,
+		Filename: filename,
+		UserID:   user.ID,
+	}
+
+	fmt.Println("image",image)
+	_, err = collection.InsertOne(ctx, image)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return image, nil
+}
+
+// DeletePicture is the resolver for the deletePicture field.
+func (r *mutationResolver) DeletePicture(ctx context.Context, id string) (*model.DeletePictureResponse, error) {
+	database, ok := config.FromContext(ctx)
+
+	_, errc := middleware.GetCurrentUserFromCTX(ctx)
+
+	if errc != nil {
+		return nil, ErrNotAuthorized
+	}
+
+	if !ok {
+		return nil, fmt.Errorf("database connection error")
+	}
+
+	collection := database.Collection("images")
+
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+
+	if err != nil {
+		return &model.DeletePictureResponse{
+			Success: false,
+			Message: "Failed to delete picture",
+		}, err
+	}
+
+	return &model.DeletePictureResponse{
+		Success: true,
+		Message: "Successfully deleted the picture",
+	}, nil
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	database, ok := config.FromContext(ctx)
@@ -134,7 +244,7 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	}
 
 	if !ok {
-		panic("db not found")
+		return nil, fmt.Errorf("database connection error")
 	}
 	var dbuser model.User
 
@@ -143,7 +253,52 @@ func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	fmt.Println("fetched user", user)
 
 	return &dbuser, nil
+}
 
+// GetAllMyProfilePictures is the resolver for the getAllMyProfilePictures field.
+func (r *queryResolver) GetAllMyProfilePictures(ctx context.Context, userID string) ([]*model.Image, error) {
+	user, err := middleware.GetCurrentUserFromCTX(ctx)
+
+	if err != nil {
+		return nil, ErrNotAuthorized
+	}
+
+	fmt.Println("user", user)
+
+	database, ok := config.FromContext(ctx)
+
+	if !ok {
+		return nil, fmt.Errorf("database connection error")
+	}
+
+	collection := database.Collection("images")
+
+	var images []*model.Image
+
+	cursor, err := collection.Find(ctx, bson.M{"userid": userID})
+
+	fmt.Println("Cursor",cursor)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for cursor.Next(ctx) {
+		var image *model.Image
+		if err := cursor.Decode(&image); err != nil {
+			return nil, err
+		}
+		fmt.Println("Image",image)
+		images = append(images, image)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Images",images)
+
+	return images, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -154,3 +309,15 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+var (
+	ErrBadCredential      = errors.New("invalid email or password")
+	ErrNotAuthorized      = errors.New("authorization required, please log in again")
+	ErrMissingLoginFields = errors.New("email and password are required")
+)
