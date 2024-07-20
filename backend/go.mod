@@ -1,6 +1,6 @@
 module github.com/akadotsh/image-app/backend
 
-go 1.22.4
+go 1.21
 
 require (
 	github.com/99designs/gqlgen v0.17.49
