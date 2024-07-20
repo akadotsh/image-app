@@ -1,18 +1,8 @@
 # Full Stack Photo Upload Application
 
-<!-- ![GitHub](https://img.shields.io/github/license/yourusername/your-repo-name)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/your-repo-name) -->
-
-<!-- ![GitHub top language](https://img.shields.io/github/languages/top/boidushya/better-lyrics-api)
-![GitHub License](https://img.shields.io/github/license/boidushya/better-lyrics-api)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/boidushya/better-lyrics-api/go.yml) -->
-
-<!-- ![Railway](https://img.shields.io/badge/deployement-railway-javascript?logo=railway&logoColor=fff&color=851AE6)
-![Vercel](https://img.shields.io/badge/deployement-railway-javascript?logo=railway&logoColor=fff&color=851AE6) -->
-
 ## Description
 
-This project is a web application that allows users to sign up, log in, upload photos to AWS S3, and view their uploaded photos. It features a Next.js frontend with Redux state management and a GraphQL API backend.
+A Full stack Image Upload Application built with Nextjs and Golang
 
 ## Table of Contents
 
@@ -29,10 +19,9 @@ This project is a web application that allows users to sign up, log in, upload p
     - [Frontend](#frontend-1)
     - [Backend](#backend-1)
     - [AWS S3](#aws-s3)
-  - [Approach and Trade-offs](#approach-and-trade-offs)
   - [Backend Architecture and Deployment](#backend-architecture-and-deployment)
     - [Frontend](#frontend-2)
-  - [🚀 Deployments](#-deployments)
+  - [🚀 Deployment](#-deployment)
 
 ## 📖 Documentation
 
@@ -61,7 +50,7 @@ This project is a web application that allows users to sign up, log in, upload p
 
 - framework: [Next.js(app router)](https://nextjs.org/docs/app)
 - [Redux](https://redux.js.org/) for state management
-- [Tanstack Query](https://tanstack.com/) for Graphql API calls and asynchronous state management
+- [Tanstack Query](https://tanstack.com/) for asynchronous state management
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Shadcn UI](https://ui.shadcn.com/) as UI Kit
 - [vitest](https://vitest.dev/) for testing
@@ -97,8 +86,6 @@ git clone https://github.com/[YOUR_ACCOUNT]/image-app.git
 1. Create an S3 bucket in your AWS account
 2. Ensure your AWS credentials have the necessary permissions
 
-## Approach and Trade-offs
-
 ## Backend Architecture and Deployment
 
 1. In the backend, I'm using Golang with Chi Router to create HTTP handlers and [gqlgen](https://github.com/99designs/gqlgen) for creating schema-based GraphQL APIs.
@@ -115,6 +102,7 @@ git clone https://github.com/[YOUR_ACCOUNT]/image-app.git
 
 2. For the UI Kit, I've utilized [Shadcn UI](https://ui.shadcn.com/) due to its high customizability and lack of extra dependencies. With Shadcn UI, we only need to install the specific UI components we intend to use.
 
-## 🚀 Deployments
+## 🚀 Deployment
 
-The Frontend of the application is deployed on [Vercel](https://vercel.com/) and the Backend of the application is deployed on [Railway](https://railway.app/)
+- The Frontend of the application is deployed on [Vercel](https://vercel.com/).
+- The Backend of the application is deployed on [Railway](https://railway.app/).
