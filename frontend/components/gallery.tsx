@@ -3,32 +3,13 @@
 import { graphqlClient } from "@/graphqlClient";
 import { RootState } from "@/lib/reduxStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { gql } from "graphql-request";
 import { useSelector } from "react-redux";
 import { MyImages } from "@/lib/types";
 import Image from "next/image";
 import { CardSkeleton } from "./card-skeleton";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-
-const MY_IMAGES = gql`
-  query getAllImages($id: ID!) {
-    getAllMyProfilePictures(userId: $id) {
-      id
-      url
-      filename
-    }
-  }
-`;
-
-const DELETE_IMAGE = gql`
-  mutation deletePicture($id: ID!) {
-    deletePicture(id: $id) {
-      success
-      message
-    }
-  }
-`;
+import { DELETE_IMAGE, MY_IMAGES } from "@/lib/graphqQueries";
 
 export const Gallery = () => {
   const id = useSelector((state: RootState) => {

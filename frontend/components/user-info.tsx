@@ -27,14 +27,10 @@ export const UserInfo = (props: Props) => {
     const graphqlError = error as ClientError;
     return (
       <div className="text-red-500">
-        {error ? (
-          <p>
-            {graphqlError?.response?.errors?.length &&
-              graphqlError.response?.errors[0]?.message}{" "}
-          </p>
-        ) : (
-          <p>Please Login to access!</p>
-        )}
+        <p>
+          {graphqlError?.response?.errors?.length &&
+            graphqlError.response?.errors[0]?.message}{" "}
+        </p>
         <Link href={"/login"} className="underline">
           Login
         </Link>

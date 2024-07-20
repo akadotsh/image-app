@@ -1,4 +1,5 @@
 import { graphqlClient } from "@/graphqlClient";
+import { GET_USER } from "@/lib/graphqQueries";
 import { RootState } from "@/lib/reduxStore";
 import {
   setErrorState,
@@ -9,18 +10,7 @@ import {
 import { User } from "@/lib/types";
 import { storage } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { gql } from "graphql-request";
 import { useDispatch, useSelector } from "react-redux";
-
-const GET_USER = gql`
-  query GetUser {
-    user {
-      id
-      name
-      email
-    }
-  }
-`;
 
 export const useGlobalUser = () => {
   const dispatch = useDispatch();

@@ -21,29 +21,12 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { gql } from "graphql-request";
 import { useMutation } from "@tanstack/react-query";
 import { graphqlClient } from "@/graphqlClient";
 import { login } from "@/lib/slices/authSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { storage } from "@/lib/utils";
-
-const CREATE_ACCOUNT = gql`
-  mutation createAccount(
-    $username: String!
-    $email: String!
-    $password: String!
-  ) {
-    createAccount(username: $username, email: $email, password: $password) {
-      token
-      user {
-        id
-        email
-        name
-      }
-    }
-  }
-`;
+import { CREATE_ACCOUNT } from "@/lib/graphqQueries";
 
 export const Signup = () => {
   const dispatch = useDispatch();
