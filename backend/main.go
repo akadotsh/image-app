@@ -20,11 +20,13 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	err:= godotenv.Load()
 
-	if err != nil {
-		log.Fatal("Failed to load variables")
-	} 
+	if os.Getenv("ENV") != "production" {
+        err := godotenv.Load()
+        if err != nil {
+            log.Fatalf("failed to load .env file")
+        }
+    }
 
 	port := os.Getenv("PORT")
 	db_password := os.Getenv("DB_PASSWORD")
@@ -33,18 +35,25 @@ func main() {
 		port = defaultPort
 	}
 
+	
+
 
 	db:= config.ConnectDB(db_password)
     
 
 	router:= chi.NewRouter();
 
-	// middlewares
-    router.Use(cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},  // Your React app's address
-		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders: []string{"*"},
-	}).Handler)
+	corsMiddleware := cors.New(cors.Options{
+        AllowedOrigins:   []string{"*"}, 
+        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+        ExposedHeaders:   []string{"Link"},
+        AllowCredentials: true,
+        MaxAge:           300, 
+    })
+
+	
+	router.Use(corsMiddleware.Handler)
    router.Use(middleware.Logger)
    router.Use(customMiddleware.AuthMiddleware(db))
 
