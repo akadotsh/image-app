@@ -15,12 +15,13 @@ A Full stack Image Upload Application built with Nextjs and Golang
     - [Backend](#backend)
     - [Frontend](#frontend)
     - [Database](#database)
+  - [Getting Started](#getting-started)
   - [Setup](#setup)
     - [Frontend](#frontend-1)
     - [Backend](#backend-1)
     - [AWS S3](#aws-s3)
-  - [Backend Architecture and Deployment](#backend-architecture-and-deployment)
-    - [Frontend](#frontend-2)
+    - [Backend Architecture and Deployment](#backend-architecture-and-deployment)
+    - [Frontend Architecture](#frontend-architecture)
   - [🚀 Deployment](#-deployment)
 
 ## 📖 Documentation
@@ -59,6 +60,15 @@ A Full stack Image Upload Application built with Nextjs and Golang
 
 - [Mongodb](https://www.mongodb.com/products/platform/atlas-database)
 
+## Getting Started
+
+Prerequisites:
+
+- Node.js
+- Go
+- MongoDB
+- AWS account with S3 bucket
+
 ## Setup
 
 Clone the repository:
@@ -86,7 +96,7 @@ git clone https://github.com/[YOUR_ACCOUNT]/image-app.git
 1. Create an S3 bucket in your AWS account
 2. Ensure your AWS credentials have the necessary permissions
 
-## Backend Architecture and Deployment
+### Backend Architecture and Deployment
 
 1. In the backend, I'm using Golang with Chi Router to create HTTP handlers and [gqlgen](https://github.com/99designs/gqlgen) for creating schema-based GraphQL APIs.
 
@@ -96,11 +106,19 @@ git clone https://github.com/[YOUR_ACCOUNT]/image-app.git
 
 4. For deployment, I have created a Dockerfile and added instructions on how to build and run the app.
 
-### Frontend
+### Frontend Architecture
 
-1. In the frontend, I'm using TanStack Query instead of Apollo Client because it offers a simpler setup and comes with developer tools, which greatly enhances the Developer Experience (DX).
+1. The Frontend is built with:
 
-2. For the UI Kit, I've utilized [Shadcn UI](https://ui.shadcn.com/) due to its high customizability and lack of extra dependencies. With Shadcn UI, we only need to install the specific UI components we intend to use.
+   - Next.js
+   - Tailwind CSS
+   - Redux
+   - TanStack Query
+   - Shadcn UI
+
+2. I'm using TanStack Query instead of Apollo Client because it offers a simpler setup and comes with developer tools, which greatly enhances the Developer Experience (DX).
+
+3. For the UI Kit, I've utilized [Shadcn UI](https://ui.shadcn.com/) due to its high customizability and lack of extra dependencies. With Shadcn UI, we only need to install the specific UI components we intend to use.
 
 ## 🚀 Deployment
 
