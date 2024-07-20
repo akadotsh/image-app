@@ -5,10 +5,10 @@ introspection:
   schemaFile: ./graph/schema.graphqls
 
 servers:
-  - url: http://localhost:8080/query
-    description: Local Development Server
+  - url: https://image-app-production.up.railway.app/query
+    description: Production Development Server
 
 
 info:
-  title: Image Upload API
-  description: Image Upload Graphql Documentation
+  title: Image Upload App API
+  description: Graphql API Documentation

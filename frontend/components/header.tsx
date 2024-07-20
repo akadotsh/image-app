@@ -10,8 +10,6 @@ import { ToggleTheme } from "./toggle-theme";
 export const Header = () => {
   const state = useSelector((state: RootState) => state.auth);
 
-  console.log("state", state);
-
   const handleLogout = () => {
     storage.remove("token");
     window.location.replace("/");

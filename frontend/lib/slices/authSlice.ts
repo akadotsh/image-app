@@ -4,7 +4,6 @@ import { ClientError } from "graphql-request";
 interface AuthState {
   isLoading: boolean;
   isLoggedIn: boolean;
-  token: string | undefined;
   userId: string | undefined;
   name: string | undefined;
   email: string | undefined;
@@ -14,7 +13,6 @@ interface AuthState {
 const initialState: AuthState = {
   isLoading: false,
   isLoggedIn: false,
-  token: undefined,
   userId: undefined,
   name: undefined,
   email: undefined,
@@ -27,13 +25,11 @@ const authSlice = createSlice({
   reducers: {
     login(state, action: PayloadAction<{ token: string; userId: string }>) {
       state.isLoggedIn = true;
-      state.token = action.payload.token;
       state.userId = action.payload.userId;
       state.error = null;
     },
     logout(state) {
       state.isLoggedIn = false;
-      state.token = undefined;
       state.userId = undefined;
     },
     updateAuthState(state, action: PayloadAction<boolean>) {
