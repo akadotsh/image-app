@@ -9,6 +9,7 @@ A Full stack Image Upload Application built with Nextjs and Golang
 - [Full Stack Photo Upload Application](#full-stack-photo-upload-application)
   - [Description](#description)
   - [Table of Contents](#table-of-contents)
+  - [Live Application](#live-application)
   - [📖 Documentation](#-documentation)
   - [🛠 Features](#-features)
   - [🧱 Stack](#-stack)
@@ -23,6 +24,11 @@ A Full stack Image Upload Application built with Nextjs and Golang
     - [Backend Architecture and Deployment](#backend-architecture-and-deployment)
     - [Frontend Architecture](#frontend-architecture)
   - [🚀 Deployment](#-deployment)
+
+## Live Application
+
+- Frontend: [https://image-app-614g.vercel.app/](https://image-app-614g.vercel.app/)
+- Backend: [https://image-app-production.up.railway.app/](https://image-app-production.up.railway.app/)
 
 ## 📖 Documentation
 
@@ -119,6 +125,8 @@ git clone https://github.com/[YOUR_ACCOUNT]/image-app.git
 2. I'm using TanStack Query instead of Apollo Client because it offers a simpler setup and comes with developer tools, which greatly enhances the Developer Experience (DX).
 
 3. For the UI Kit, I've utilized [Shadcn UI](https://ui.shadcn.com/) due to its high customizability and lack of extra dependencies. With Shadcn UI, we only need to install the specific UI components we intend to use.
+
+4. **Note on Authentication**: For the purposes of this take-home task, JWT tokens are stored in local storage. In a production environment, a more secure approach would be to store tokens in HTTP-only cookies to mitigate XSS risks.
 
 ## 🚀 Deployment
 
