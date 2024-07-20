@@ -7,6 +7,7 @@ import {
   updateUserInfo,
 } from "@/lib/slices/authSlice";
 import { User } from "@/lib/types";
+import { storage } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { gql } from "graphql-request";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,6 +27,8 @@ export const useGlobalUser = () => {
   const { isLoggedIn, userId, name, email, isLoading } = useSelector(
     (state: RootState) => state.auth
   );
+
+  const token = storage.get("token");
 
   useQuery<{ user: User }>({
     queryKey: ["user"],
@@ -47,10 +50,9 @@ export const useGlobalUser = () => {
         dispatch(updateAuthState(false));
         dispatch(setErrorState(error));
         throw error;
-      } finally {
-        dispatch(setIsFetching(false));
       }
     },
+    enabled: !!token,
   });
 
   return { isLoggedIn, userId, name, email, isLoading };

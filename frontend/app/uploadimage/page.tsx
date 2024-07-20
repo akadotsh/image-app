@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { CloudUploadIcon } from "@/components/ui/icons";
 import { Label } from "@/components/ui/label";
 import { endpoint } from "@/graphqlClient";
+import { storage } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -40,12 +41,12 @@ const UploadImage = () => {
     );
     formData.append("map", JSON.stringify({ "0": ["variables.file"] }));
     formData.append("0", file);
-    const token = localStorage.getItem("token") ?? "";
-
+    const token = storage.get("token");
+    const parsedToken = token ? JSON.parse(token) : "";
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${parsedToken}`,
       },
       body: formData,
     });
@@ -60,22 +61,19 @@ const UploadImage = () => {
   const uploadImageMutation = useMutation({
     mutationFn: (file: File) => uploadImage(file),
     onSuccess(data) {
-      console.log("onSuccess:data", data);
       setFile(null);
       setPreview("");
     },
     onError(err) {
-      console.log("onError:err", err);
       setFile(null);
       setPreview("");
     },
     onSettled() {},
   });
 
-  console.log("File", file);
   return (
     <div className="px-4 flex justify-center items-center mt-10">
-      <div className="w-1/2">
+      <div className="w-full sm:w-1/2">
         <div className="grid gap-6 w-full mx-auto p-4">
           <div className="grid gap-2">
             <Label htmlFor="image">

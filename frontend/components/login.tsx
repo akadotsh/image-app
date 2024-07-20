@@ -22,9 +22,10 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { gql } from "graphql-request";
+import { ClientError, gql } from "graphql-request";
 import { useMutation } from "@tanstack/react-query";
 import { graphqlClient } from "@/graphqlClient";
+import { storage } from "@/lib/utils";
 
 const LOGIN = gql`
   mutation login($email: String!, $password: String!) {
@@ -57,13 +58,14 @@ export const Login = () => {
         },
         {
           onSuccess: (data: any) => {
-            console.log(data);
-            localStorage.setItem("token", data.login.token);
+            storage.set("token", data.login.token);
             window.location.replace("/");
             loginform.reset();
           },
           onError: (error: any) => {
             console.error(error);
+            const graphlErr = error as ClientError;
+            toast.error(graphlErr.message);
           },
         }
       );

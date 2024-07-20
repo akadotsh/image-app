@@ -12,6 +12,7 @@ import { useTheme } from "next-themes";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/reduxStore";
 import { BlockSkeleton } from "./block-skeleton";
+import { storage } from "@/lib/utils";
 
 export const Header = () => {
   const { setTheme } = useTheme();
@@ -20,7 +21,7 @@ export const Header = () => {
   console.log("state", state);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    storage.remove("token");
     window.location.replace("/");
   };
 

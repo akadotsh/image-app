@@ -10,6 +10,8 @@ import {
 } from "./ui/card";
 import Link from "next/link";
 import { CardSkeleton } from "./card-skeleton";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/reduxStore";
 
 interface Props {
   isLoading: boolean;
@@ -18,22 +20,21 @@ interface Props {
 }
 
 export const UserInfo = (props: Props) => {
-  const { data, error, isLoading } = props;
-
-  console.log("error", error);
-
-  if (isLoading) {
-    return <CardSkeleton />;
-  }
+  const { data, error } = props;
+  const { isLoggedIn } = useSelector((state: RootState) => state.auth);
 
   if (error) {
     const graphqlError = error as ClientError;
     return (
       <div className="text-red-500">
-        <p>
-          {graphqlError?.response?.errors?.length &&
-            graphqlError.response?.errors[0]?.message}{" "}
-        </p>
+        {error ? (
+          <p>
+            {graphqlError?.response?.errors?.length &&
+              graphqlError.response?.errors[0]?.message}{" "}
+          </p>
+        ) : (
+          <p>Please Login to access!</p>
+        )}
         <Link href={"/login"} className="underline">
           Login
         </Link>
@@ -42,21 +43,26 @@ export const UserInfo = (props: Props) => {
   }
 
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>{data?.name}</CardTitle>
-          <CardDescription>{data?.email}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col text-base space-y-4">
-          <Link href={"/uploadimage"} className="underline">
-            Upload Image
-          </Link>
-          <Link href={"/myimages"} className="underline">
-            View My Image
-          </Link>
-        </CardContent>
-      </Card>
+    <div className="">
+      {isLoggedIn ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Name: {data?.name}</CardTitle>
+            <CardDescription>Email: {data?.email}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col text-base space-y-4">
+            <Link href="/uploadimage" className="underline">
+              Upload Image
+            </Link>
+            <Link href="/myimages" className="underline">
+              View My Images
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <CardSkeleton />
+      )}
     </div>
   );
 };
+//  null}

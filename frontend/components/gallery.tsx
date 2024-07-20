@@ -2,12 +2,14 @@
 
 import { graphqlClient } from "@/graphqlClient";
 import { RootState } from "@/lib/reduxStore";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { gql } from "graphql-request";
 import { useSelector } from "react-redux";
 import { MyImages } from "@/lib/types";
 import Image from "next/image";
 import { CardSkeleton } from "./card-skeleton";
+import { Button } from "./ui/button";
+import { toast } from "sonner";
 
 const MY_IMAGES = gql`
   query getAllImages($id: ID!) {
@@ -19,12 +21,21 @@ const MY_IMAGES = gql`
   }
 `;
 
+const DELETE_IMAGE = gql`
+  mutation deletePicture($id: ID!) {
+    deletePicture(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
 export const Gallery = () => {
   const id = useSelector((state: RootState) => {
     return state.auth.userId;
   });
 
-  const { isLoading, data } = useQuery<{
+  const { isLoading, data, refetch } = useQuery<{
     getAllMyProfilePictures: MyImages[];
   }>({
     queryKey: ["myimages"],
@@ -33,6 +44,22 @@ export const Gallery = () => {
     staleTime: 0,
     refetchOnMount: true,
   });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async ({ id }: { id: string }) =>
+      graphqlClient.request(DELETE_IMAGE, { id }),
+    onSuccess(data) {
+      toast.success("successfully deleted the image");
+    },
+    onError() {
+      toast.error("failed to delete the image");
+    },
+  });
+
+  const handleDeleteImage = (id: string) => {
+    deleteImageMutation.mutate({ id });
+    refetch();
+  };
 
   return (
     <div>
@@ -53,7 +80,7 @@ export const Gallery = () => {
             data?.getAllMyProfilePictures.map((image) => (
               <div
                 key={image.id}
-                className="group relative overflow-hidden rounded-lg cursor-pointer"
+                className="group relative overflow-hidden rounded-lg cursor-pointer flex flex-col items-center"
               >
                 <Image
                   src={image.url}
@@ -62,6 +89,14 @@ export const Gallery = () => {
                   height={400}
                   className="w-full h-60 object-cover"
                 />
+                <Button
+                  variant={"destructive"}
+                  className="w-full mt-2"
+                  onClick={() => handleDeleteImage(image.id)}
+                  disabled={deleteImageMutation.isPending}
+                >
+                  Remove
+                </Button>
               </div>
             ))}
         </div>

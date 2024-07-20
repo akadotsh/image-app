@@ -26,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { graphqlClient } from "@/graphqlClient";
 import { login } from "@/lib/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { storage } from "@/lib/utils";
 
 const CREATE_ACCOUNT = gql`
   mutation createAccount(
@@ -69,8 +70,7 @@ export const Signup = () => {
         },
         {
           onSuccess: (data: any) => {
-            console.log(data);
-            localStorage.setItem("token", data.createAccount.token);
+            storage.set("token", data.login.token);
             dispatch(
               login({ token: data.createAccount.token, userId: "user-id" })
             );

@@ -12,7 +12,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  isLoading: true,
+  isLoading: false,
   isLoggedIn: false,
   token: undefined,
   userId: undefined,
@@ -51,6 +51,7 @@ const authSlice = createSlice({
       state.email = action.payload.email;
       state.userId = action.payload.userId;
       state.isLoggedIn = true;
+      state.isLoading = false;
       state.error = null;
     },
     setIsFetching(state, action: PayloadAction<boolean>) {
