@@ -58,7 +58,7 @@ export const Gallery = () => {
               ))
             : null}
           {!isLoading &&
-            data?.getAllMyProfilePictures.map((image) => (
+            data?.getAllMyProfilePictures?.map((image) => (
               <div
                 key={image.id}
                 className="group relative overflow-hidden rounded-lg cursor-pointer flex flex-col items-center"
