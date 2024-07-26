@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -18,8 +19,9 @@ var DB *mongo.Database
 type contextKey string
 
 const dbKey contextKey = "db"
+const dbname = "imageapp"
 
-func ConnectDB(password string) *mongo.Database{
+func ConnectDB(password string) (*mongo.Database,error){
 	
   ctx,cancel:=	context.WithTimeout(context.Background(), 10*time.Second);
 
@@ -35,9 +37,21 @@ func ConnectDB(password string) *mongo.Database{
 
  fmt.Println("DB Connected successfully")
 
- DB = client.Database("imageapp")
+ DB = client.Database(dbname)
 
- return DB
+ collection:= client.Database(dbname).Collection("images");
+
+ indexModel:= mongo.IndexModel{
+	Keys: bson.D{{Key:"userid",Value: 1}},
+ }
+
+ _,err= collection.Indexes().CreateOne(ctx,indexModel)
+
+ if err !=nil {
+	return nil, fmt.Errorf("failed to create index: %v", err)
+}
+
+ return DB ,nil
 }
 
 

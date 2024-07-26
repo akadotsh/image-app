@@ -38,8 +38,11 @@ func main() {
 	
 
 
-	db:= config.ConnectDB(db_password)
-    
+	db,err:= config.ConnectDB(db_password)
+
+	if err != nil{
+		panic("Failed to initialize DB")
+	}
 
 	router:= chi.NewRouter();
 

@@ -19,7 +19,6 @@ import (
 var CurrentUserKey = "current_user"
 
 func AuthMiddleware(db *mongo.Database) func(http.Handler) http.Handler {
-	fmt.Println("AuthMiddleware Called")
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
