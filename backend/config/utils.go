@@ -7,7 +7,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 // Move to env variable
 var SecretKey = []byte("your-very-secret-key")
 

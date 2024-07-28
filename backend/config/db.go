@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var uri = `mongodb+srv://devakash256:PASSWORD@test.ebuvh6t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+var uri = `mongodb+srv://devakash256:PASSWORD@test.ebuvh6t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
 var DB *mongo.Database
 
@@ -21,39 +21,45 @@ type contextKey string
 const dbKey contextKey = "db"
 const dbname = "imageapp"
 
-func ConnectDB(password string) (*mongo.Database,error){
-	
-  ctx,cancel:=	context.WithTimeout(context.Background(), 10*time.Second);
+func ConnectDB(password string) (*mongo.Database, error) {
 
-  defer cancel();
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-  uri= strings.Replace(uri,"PASSWORD",password,1)
+	defer cancel()
 
-  client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	uri = strings.Replace(uri, "PASSWORD", password, 1)
 
-  if err != nil {
-	log.Fatal(err)
-  }
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 
- fmt.Println("DB Connected successfully")
+	if err != nil {
+		log.Fatal(err)
+	}
 
- DB = client.Database(dbname)
+	// gracefully shutting down DB connection
+	defer func() {
+		if err = client.Disconnect(ctx); err != nil {
+			panic(err)
+		}
+	}()
 
- collection:= client.Database(dbname).Collection("images");
+	fmt.Println("DB Connected successfully")
 
- indexModel:= mongo.IndexModel{
-	Keys: bson.D{{Key:"userid",Value: 1}},
- }
+	DB = client.Database(dbname)
 
- _,err= collection.Indexes().CreateOne(ctx,indexModel)
+	collection := client.Database(dbname).Collection("images")
 
- if err !=nil {
-	return nil, fmt.Errorf("failed to create index: %v", err)
+	indexModel := mongo.IndexModel{
+		Keys: bson.D{{Key: "userid", Value: 1}},
+	}
+
+	_, err = collection.Indexes().CreateOne(ctx, indexModel)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create index: %v", err)
+	}
+
+	return DB, nil
 }
-
- return DB ,nil
-}
-
 
 func WithDB(ctx context.Context, db *mongo.Database) context.Context {
 	return context.WithValue(ctx, dbKey, db)
