@@ -126,7 +126,7 @@ git clone https://github.com/[YOUR_ACCOUNT]/image-app.git
 
 3. For the UI Kit, I've utilized [Shadcn UI](https://ui.shadcn.com/) due to its high customizability and lack of extra dependencies. With Shadcn UI, we only need to install the specific UI components we intend to use.
 
-4. **Note on Authentication**: For the purposes of this take-home task, JWT tokens are stored in local storage. In a production environment, a more secure approach would be to store tokens in HTTP-only cookies to mitigate XSS risks.
+4. **Note on Authentication**: JWT tokens are stored in local storage. In a production environment, a more secure approach would be to store tokens in HTTP-only cookies to mitigate XSS risks.
 
 ## 🚀 Deployment
 
